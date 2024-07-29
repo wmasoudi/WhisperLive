@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "whisperlive"
+version = "0.1.0"
+description = ""
+authors = ["Walid Masoudimansour <wmasoudi@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+websockets = "^12.0"
+numpy = "1.26.4"
+websocket-client = "1.8.0"
+cprofilev = "^1.0.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

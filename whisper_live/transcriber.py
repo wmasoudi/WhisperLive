@@ -3,6 +3,7 @@
 import itertools
 import json
 import logging
+logging.disable(logging.CRITICAL)
 import os
 import zlib
 

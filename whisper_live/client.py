@@ -2,7 +2,6 @@ import os
 import shutil
 import wave
 
-import logging
 import numpy as np
 import pyaudio
 import threading
@@ -29,7 +28,8 @@ class Client:
         translate=False,
         model="small",
         srt_file_path="output.srt",
-        use_vad=True
+        use_vad=True,
+        output_queue=None
     ):
         """
         Initializes a Client instance for audio recording and streaming to a server.
@@ -57,6 +57,7 @@ class Client:
         self.use_vad = use_vad
         self.last_segment = None
         self.last_received_segment = None
+        self.output_queue = output_queue
 
         if translate:
             self.task = "translate"
@@ -119,9 +120,10 @@ class Client:
             self.last_received_segment = segments[-1]["text"]
 
         # Truncate to last 3 entries for brevity.
-        text = text[-3:]
-        utils.clear_screen()
-        utils.print_transcript(text)
+        # text = text[-3:]
+        # utils.clear_screen()
+        # utils.print_transcript(text)
+        self.output_queue.put(" ".join(map(str, text)))
 
     def on_message(self, ws, message):
         """
@@ -432,8 +434,6 @@ class TranscriptionTeeClient:
 
     def handle_ffmpeg_process(self, process, stream_type):
         print(f"[INFO]: Connecting to {stream_type} stream...")
-        stderr_thread = threading.Thread(target=self.consume_stderr, args=(process,))
-        stderr_thread.start()
         try:
             # Process the stream
             while True:
@@ -479,16 +479,6 @@ class TranscriptionTeeClient:
             )
 
         return process
-
-    def consume_stderr(self, process):
-        """
-        Consume and log the stderr output of a process in a separate thread.
-
-        Args:
-            process (subprocess.Popen): The process whose stderr output will be logged.
-        """
-        for line in iter(process.stderr.readline, b""):
-            logging.debug(f'[STDERR]: {line.decode()}')
 
     def save_chunk(self, n_audio_file):
         """
@@ -677,9 +667,10 @@ class TranscriptionClient(TranscriptionTeeClient):
         use_vad=True,
         save_output_recording=False,
         output_recording_filename="./output_recording.wav",
-        output_transcription_path="./output.srt"
+        output_transcription_path="./output.srt",
+        output_queue=None
     ):
-        self.client = Client(host, port, lang, translate, model, srt_file_path=output_transcription_path, use_vad=use_vad)
+        self.client = Client(host, port, lang, translate, model, srt_file_path=output_transcription_path, use_vad=use_vad, output_queue=output_queue)
         if save_output_recording and not output_recording_filename.endswith(".wav"):
             raise ValueError(f"Please provide a valid `output_recording_filename`: {output_recording_filename}")
         if not output_transcription_path.endswith(".srt"):
