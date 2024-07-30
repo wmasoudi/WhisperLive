@@ -29,7 +29,8 @@ class Client:
         model="small",
         srt_file_path="output.srt",
         use_vad=True,
-        output_queue=None
+        output_queue=None,
+        prompt=None
     ):
         """
         Initializes a Client instance for audio recording and streaming to a server.
@@ -58,6 +59,7 @@ class Client:
         self.last_segment = None
         self.last_received_segment = None
         self.output_queue = output_queue
+        self.prompt = prompt
 
         if translate:
             self.task = "translate"
@@ -199,7 +201,8 @@ class Client:
                     "language": self.language,
                     "task": self.task,
                     "model": self.model,
-                    "use_vad": self.use_vad
+                    "use_vad": self.use_vad,
+                    "initial_prompt": self.prompt,
                 }
             )
         )
@@ -668,9 +671,10 @@ class TranscriptionClient(TranscriptionTeeClient):
         save_output_recording=False,
         output_recording_filename="./output_recording.wav",
         output_transcription_path="./output.srt",
-        output_queue=None
+        output_queue=None,
+        prompt=None
     ):
-        self.client = Client(host, port, lang, translate, model, srt_file_path=output_transcription_path, use_vad=use_vad, output_queue=output_queue)
+        self.client = Client(host, port, lang, translate, model, srt_file_path=output_transcription_path, use_vad=use_vad, output_queue=output_queue, prompt=prompt)
         if save_output_recording and not output_recording_filename.endswith(".wav"):
             raise ValueError(f"Please provide a valid `output_recording_filename`: {output_recording_filename}")
         if not output_transcription_path.endswith(".srt"):

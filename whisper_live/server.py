@@ -313,9 +313,9 @@ class TranscriptionServer:
             del websocket
 
     def run(self,
-            host,
+            host='localhost',
             port=9090,
-            backend="tensorrt",
+            backend="faster_whisper",
             faster_whisper_custom_model_path=None,
             whisper_tensorrt_path=None,
             trt_multilingual=False,
